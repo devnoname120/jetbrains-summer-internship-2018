@@ -1,6 +1,6 @@
 package devnoname120
 
-import io.circe._, io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
+import play.api.libs.json._
 
 sealed trait BooleanExpression
 case object True extends BooleanExpression
@@ -10,32 +10,30 @@ case class Not(e: BooleanExpression) extends BooleanExpression
 case class Or(e1: BooleanExpression, e2: BooleanExpression) extends BooleanExpression
 case class And(e1: BooleanExpression, e2: BooleanExpression) extends BooleanExpression
 
-
-object BooleanExpression {
-  private def parseDecodeError(err: DecodingFailure, cursor: HCursor) : String = {
-    val path: String = CursorOp.opsToPath(err.history)
-    val down = cursor.downField(path)
-
-    if (down.succeeded) {
-      s"Could not decode [$path.${down.focus.get}] as type [${err.message}]."
-    } else {
-      s"The field [$path] is incorrect."
+trait BooleanExpressionJsonFormat {
+  // Only keep the class name in the JSON type field
+  implicit val cfg = JsonConfiguration(
+    typeNaming = JsonNaming { fullName =>
+      Unit
+      fullName.split('.').last
     }
-  }
+  )
 
+  implicit val trueFormat = Json.format[True.type]
+  implicit val falseFormat = Json.format[False.type]
+  implicit val variableFormat = Json.format[Variable]
+  implicit lazy val notFormat = Json.format[Not]
+  implicit lazy val orFormat = Json.format[Or]
+  implicit lazy val andFormat = Json.format[And]
+  implicit val booleanExpresssionFormat: OFormat[BooleanExpression] = Json.format[BooleanExpression]
+}
+
+object BooleanExpression extends BooleanExpressionJsonFormat {
   def fromJSON(booleanExpression: String) : BooleanExpression = {
-    parse(booleanExpression) match {
-      case Left(err: ParsingFailure) => throw err
-      case Right(json: Json) =>
-        val cursor = json.hcursor
-        json.as[BooleanExpression] match {
-          case Right(expr) => expr
-          case Left(err: DecodingFailure) => throw new IllegalArgumentException(parseDecodeError(err, cursor))
-        }
-    }
-      }
+    Json.parse(booleanExpression).as[BooleanExpression]
+  }
   def toJSON(booleanExpression: BooleanExpression) : String = {
-    booleanExpression.asJson.noSpaces
+    Json.toJson(booleanExpression).toString
   }
 }
 
