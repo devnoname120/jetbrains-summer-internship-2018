@@ -1,4 +1,4 @@
-# Test assignment
+# Test assignment ![](https://travis-ci.org/devnoname120/jetbrains-summer-internship-2018.svg?branch=master)
 
 ## Warmup
 
