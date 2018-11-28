@@ -75,13 +75,13 @@ package object Extensions {
         case Variable(symbol) => symbol
         case Not(e) => "¬" + e.toMathString(top = false)
         case Or(e1, e2) =>
-          val expr = e1.toMathString(top = false) + "∨" + e2.toMathString(top = false)
+          val expr = e1.toMathString(top = false) + " ∨ " + e2.toMathString(top = false)
           if (!top)
             s"($expr)"
           else
             expr
         case And(e1, e2) =>
-          val expr = e1.toMathString(top = false) + "∧" + e2.toMathString(top = false)
+          val expr = e1.toMathString(top = false) + " ∧ " + e2.toMathString(top = false)
           if (!top)
             s"($expr)"
           else
