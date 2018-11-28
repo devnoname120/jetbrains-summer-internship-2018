@@ -1,12 +1,15 @@
 package devnoname120
 
 import play.api.libs.json.JsonConfiguration.Aux
+import play.api.libs.json.Reads._
 import play.api.libs.json._
 
 sealed trait BooleanExpression
 case object True extends BooleanExpression
 case object False extends BooleanExpression
-case class Variable(symbol: String) extends BooleanExpression
+case class Variable(symbol: String) extends BooleanExpression {
+  require(symbol.nonEmpty)
+}
 case class Not(e: BooleanExpression) extends BooleanExpression
 case class Or(e1: BooleanExpression, e2: BooleanExpression) extends BooleanExpression
 case class And(e1: BooleanExpression, e2: BooleanExpression) extends BooleanExpression
@@ -27,7 +30,8 @@ package object Extensions {
 
     implicit val trueFormat: OFormat[True.type] = Json.format[True.type]
     implicit val falseFormat: OFormat[False.type] = Json.format[False.type]
-    implicit val variableFormat: OFormat[Variable] = Json.format[Variable]
+    implicit val variableWrites: Writes[Variable] = Json.writes[Variable]
+    implicit val variableReads: Reads[Variable] = (JsPath \ "symbol").read[String](minLength[String](1)).map(Variable)
     implicit lazy val notFormat: OFormat[Not] = Json.format[Not]
     implicit lazy val orFormat: OFormat[Or] = Json.format[Or]
     implicit lazy val andFormat: OFormat[And] = Json.format[And]

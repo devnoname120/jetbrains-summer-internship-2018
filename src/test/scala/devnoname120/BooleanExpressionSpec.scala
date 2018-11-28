@@ -5,6 +5,12 @@ import play.api.libs.json.JsResultException
 import Extensions._
 
 class BooleanExpressionSpec extends FlatSpec with Matchers {
+  "Variable" should "not allow to have an empty symbol" in {
+    a [IllegalArgumentException] should be thrownBy {
+      Variable("")
+    }
+  }
+
   "True JSON" should "be parsed correctly" in {
     val expr = BooleanExpression.fromJSON("""{"_type": "True"}""")
     expr shouldEqual True
@@ -22,6 +28,11 @@ class BooleanExpressionSpec extends FlatSpec with Matchers {
     the[JsResultException] thrownBy {
       BooleanExpression.fromJSON("""{"_type": "Variable"}""")
     } should have message "JsResultException(errors:List((/symbol,List(JsonValidationError(List(error.path.missing),WrappedArray())))))"
+  }
+  it should "throw JsResultException if symbol is empty" in {
+    the[JsResultException] thrownBy {
+      BooleanExpression.fromJSON("""{"_type": "Variable", "symbol": ""}""")
+    } should have message "JsResultException(errors:List((/symbol,List(JsonValidationError(List(error.minLength),WrappedArray(1))))))"
   }
   it should "throw JsResultException if symbol is not a string" in {
     the[JsResultException] thrownBy {
@@ -96,5 +107,14 @@ class BooleanExpressionSpec extends FlatSpec with Matchers {
         |}""".stripMargin
     val expr = BooleanExpression.fromJSON(complex)
     expr shouldEqual Or(False, And(Variable("foobar"), Not(True)))
+  }
+
+  "BooleanExpression" should "be converted to a math string correctly" in {
+    True.toMathString() shouldEqual "true"
+    False.toMathString() shouldEqual "false"
+    Not(True).toMathString() shouldEqual "¬true"
+    And(True, False).toMathString() shouldEqual "true ∧ false"
+    Or(True, False).toMathString() shouldEqual "true ∨ false"
+    Or(And(True, True), False).toMathString() shouldEqual "(true ∧ true) ∨ false"
   }
 }
