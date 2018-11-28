@@ -11,6 +11,16 @@ class BooleanExpressionSpec extends FlatSpec with Matchers {
     }
   }
 
+  "BooleanExpression" should "be converted to a math string correctly" in {
+    True.toMathString() shouldEqual "true"
+    False.toMathString() shouldEqual "false"
+    Not(True).toMathString() shouldEqual "¬true"
+    And(True, False).toMathString() shouldEqual "true ∧ false"
+    Or(True, False).toMathString() shouldEqual "true ∨ false"
+    Or(And(True, True), False).toMathString() shouldEqual "(true ∧ true) ∨ false"
+    Variable("long variable").toMathString() shouldEqual "long_variable"
+  }
+
   "True JSON" should "be parsed correctly" in {
     val expr = BooleanExpression.fromJSON("""{"_type": "True"}""")
     expr shouldEqual True
@@ -107,14 +117,5 @@ class BooleanExpressionSpec extends FlatSpec with Matchers {
         |}""".stripMargin
     val expr = BooleanExpression.fromJSON(complex)
     expr shouldEqual Or(False, And(Variable("foobar"), Not(True)))
-  }
-
-  "BooleanExpression" should "be converted to a math string correctly" in {
-    True.toMathString() shouldEqual "true"
-    False.toMathString() shouldEqual "false"
-    Not(True).toMathString() shouldEqual "¬true"
-    And(True, False).toMathString() shouldEqual "true ∧ false"
-    Or(True, False).toMathString() shouldEqual "true ∨ false"
-    Or(And(True, True), False).toMathString() shouldEqual "(true ∧ true) ∨ false"
   }
 }

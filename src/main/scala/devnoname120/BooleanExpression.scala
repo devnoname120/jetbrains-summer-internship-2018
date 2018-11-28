@@ -72,7 +72,7 @@ package object Extensions {
       expr match {
         case True => "true"
         case False => "false"
-        case Variable(symbol) => symbol
+        case Variable(symbol) => symbol.replace(' ', '_')
         case Not(e) => "¬" + e.toMathString(top = false)
         case Or(e1, e2) =>
           val expr = e1.toMathString(top = false) + " ∨ " + e2.toMathString(top = false)
