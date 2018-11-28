@@ -2,6 +2,7 @@ package devnoname120
 
 import org.scalatest._
 import play.api.libs.json.JsResultException
+import Extensions._
 
 class BooleanExpressionSpec extends FlatSpec with Matchers {
   "True JSON" should "be parsed correctly" in {
