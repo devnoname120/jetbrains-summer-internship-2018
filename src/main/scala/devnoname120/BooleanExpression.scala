@@ -56,5 +56,31 @@ object BooleanExpression extends BooleanExpressionJsonFormat {
   def toJSON(booleanExpression: BooleanExpression) : String = {
     Json.toJson(booleanExpression).toString
   }
+
+  /**
+    * Convert a [[BooleanExpression]] into a human-readable boolean algebra expression
+    * @param top Is a top expression
+    * @return
+    */
+  def toMathString(booleanExpression: BooleanExpression, top: Boolean = true): String = {
+    booleanExpression match {
+      case True => "true"
+      case False => "false"
+      case Variable(symbol) => symbol
+      case Not(e) => "¬" + BooleanExpression.toMathString(e, top = false)
+      case Or(e1, e2) =>
+        val expr = BooleanExpression.toMathString(e1,top = false) + "∨" + BooleanExpression.toMathString(e2, top = false)
+        if (!top)
+          s"($expr)"
+        else
+          expr
+      case And(e1, e2) =>
+        val expr = BooleanExpression.toMathString(e1, top = false) + "∧" + BooleanExpression.toMathString(e2, top = false)
+        if (!top)
+          s"($expr)"
+        else
+          expr
+    }
+  }
 }
 
