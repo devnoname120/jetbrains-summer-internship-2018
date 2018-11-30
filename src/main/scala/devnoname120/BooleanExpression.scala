@@ -91,6 +91,59 @@ package object Extensions {
           concatExpr(e1, e2, "∧")
       }
     }
+
+    /**
+      * Convert [[expr]] to [[https://en.wikipedia.org/wiki/Conjunctive_normal_form Conjunctive Normal Form]]
+      */
+    def toCNF: BooleanExpression = {
+      def cartesianProduct(e1: Seq[BooleanExpression], e2: Seq[BooleanExpression]) = {
+        for { x <- e1; y <- e2 } yield (x, y)
+      }
+
+      /**
+        * Flatten a nested And()
+        *
+        * @param and A nested And()
+        * @return
+        * @example andFlatten(And(And(True, True), False)) == Seq(True, True, False)
+        * @example andFlatten(And(Or(True, True), False)) == Seq(Or(True, True), False)
+        */
+      def andFlatten(and: And): Seq[BooleanExpression] = {
+        def andFlattenRec(expr: BooleanExpression): Seq[BooleanExpression] = expr match {
+          case And(e1, e2) => List(e1, e2).flatMap(andFlattenRec)
+          case _ => List(expr)
+        }
+
+        andFlattenRec(and)
+      }
+
+      expr match {
+        case True | False | Variable(_) => expr
+        case And(e1, e2) => And(e1.toCNF, e2.toCNF)
+        case Or(e1, e2) =>
+          def flatten(b: BooleanExpression): Seq[BooleanExpression] = b match {
+          case a: And => andFlatten(a)
+          case b: BooleanExpression => Seq(b)
+        }
+
+          val f1 = flatten(e1.toCNF)
+          val f2 = flatten(e2.toCNF)
+
+          val orList: Seq[Or] = cartesianProduct(f1, f2).map(Or.tupled)
+          val andExpr: BooleanExpression = orList.reduceRight(And)
+
+          andExpr
+        case Not(e) =>
+          e match {
+            case False | True | Variable(_) => expr
+            // Double negation
+            case Not(e1) => e1.toCNF
+            // de Morgan's laws
+            case And(e1, e2) => Or(Not(e1), Not(e2)).toCNF
+            case Or(e1, e2) => And(Not(e1), Not(e2)).toCNF
+          }
+      }
+    }
   }
 }
 

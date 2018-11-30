@@ -118,4 +118,47 @@ class BooleanExpressionSpec extends FlatSpec with Matchers {
     val expr = BooleanExpression.fromJSON(complex)
     expr shouldEqual Or(False, And(Variable("foobar"), Not(True)))
   }
+
+  "toCNF" should "be invariant on CNF forms" in {
+    // See https://en.wikipedia.org/wiki/Conjunctive_normal_form#Examples_and_non-examples
+    val A = Variable("A")
+    A.toCNF shouldEqual A
+
+    val AorB = Or(A, Variable("B"))
+    AorB.toCNF shouldEqual AorB
+
+    val expr1 = And(AorB, Variable("C"))
+    expr1.toCNF shouldEqual expr1
+
+    val expr2 = And(expr1, Or(Not(Variable("D")), Or(Variable("E"), Variable("F"))))
+    expr2.toCNF shouldEqual expr2
+  }
+
+  it should "convert correctly to CNF" in {
+    val A = Variable("A")
+    val B = Variable("B")
+    val C = Variable("C")
+
+    val expr = Not(Or(B, C))
+    val exprCNF = And(Not(B), Not(C))
+    expr.toCNF shouldEqual exprCNF
+
+    val expr2 = Or(And(A, B), C)
+    val exprCNF2 = And(Or(A,C), Or(B, C))
+    expr2.toCNF shouldEqual exprCNF2
+
+    val expr3 = Or(And(A, B), C)
+    val exprCNF3 = And(Or(A, C), Or(B, C))
+    expr3.toCNF shouldEqual exprCNF3
+
+    val expr4 = Or(C, And(A, B))
+    val exprCNF4 = And(Or(C, A), Or(C, B))
+    expr4.toCNF shouldEqual exprCNF4
+
+    val notNotTrue = Not(Not(True))
+    notNotTrue.toCNF shouldEqual True
+
+    val notNotFalse = Not(Not(False))
+    notNotFalse.toCNF shouldEqual False
+  }
 }
