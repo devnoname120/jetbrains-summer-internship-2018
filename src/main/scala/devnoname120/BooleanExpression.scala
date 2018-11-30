@@ -65,27 +65,30 @@ package object Extensions {
 
     /**
       * Convert expr into a human-readable boolean algebra expression
+      *
       * @param top Is a top expression
       * @return
       */
     def toMathString(top: Boolean = true): String = {
+      def concatExpr(e1: BooleanExpression, e2: BooleanExpression, sym: String): String = {
+        val left = e1.toMathString(top = false)
+        val right = e2.toMathString(top = false)
+        val expr = s"$left $sym $right"
+        if (!top)
+          s"($expr)"
+        else
+          expr
+      }
+
       expr match {
         case True => "true"
         case False => "false"
         case Variable(symbol) => symbol.replace(' ', '_')
         case Not(e) => "¬" + e.toMathString(top = false)
         case Or(e1, e2) =>
-          val expr = e1.toMathString(top = false) + " ∨ " + e2.toMathString(top = false)
-          if (!top)
-            s"($expr)"
-          else
-            expr
+          concatExpr(e1, e2, "∨")
         case And(e1, e2) =>
-          val expr = e1.toMathString(top = false) + " ∧ " + e2.toMathString(top = false)
-          if (!top)
-            s"($expr)"
-          else
-            expr
+          concatExpr(e1, e2, "∧")
       }
     }
   }
