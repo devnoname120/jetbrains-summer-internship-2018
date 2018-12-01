@@ -1,5 +1,4 @@
-package devnoname120
-
+package devnoname120.BooleanExpression
 
 /**
   * A set of methods allowing to convert a boolean expression to a Normal Form

@@ -1,6 +1,6 @@
-package devnoname120
+package devnoname120.BooleanExpression
 
-import devnoname120.Extensions._
+import Extensions._
 import org.scalatest._
 import play.api.libs.json.{JsResultException, Json}
 

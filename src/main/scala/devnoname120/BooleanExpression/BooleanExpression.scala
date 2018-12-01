@@ -1,4 +1,4 @@
-package devnoname120
+package devnoname120.BooleanExpression
 
 import play.api.libs.json.JsonConfiguration.Aux
 import play.api.libs.json.Reads._
@@ -61,6 +61,15 @@ package object Extensions {
       */
     def toJSON: String = {
       Json.toJson(expr).toString
+    }
+
+    /**
+      * Convert a expr to a JSON string readable by a human
+      *
+      * @return the string representation
+      */
+    def toPrettyJSON: String = {
+      Json.prettyPrint(Json.toJson(expr))
     }
 
     /**
