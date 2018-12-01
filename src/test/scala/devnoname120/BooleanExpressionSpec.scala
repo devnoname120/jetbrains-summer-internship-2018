@@ -146,4 +146,79 @@ class BooleanExpressionSpec extends FlatSpec with Matchers {
     val expr = BooleanExpression.fromJSON(complex)
     expr shouldEqual Or(False, And(Variable("foobar"), Not(True)))
   }
+
+  "toCNF" should "be invariant on CNF forms" in {
+    // See https://en.wikipedia.org/wiki/Conjunctive_normal_form#Examples_and_non-examples
+    val A = Variable("A")
+    A.toCNF shouldEqual A
+
+    val AorB = Or(A, Variable("B"))
+    AorB.toCNF shouldEqual AorB
+
+    val expr1 = And(AorB, Variable("C"))
+    expr1.toCNF shouldEqual expr1
+
+    val expr2 = And(expr1, Or(Not(Variable("D")), Or(Variable("E"), Variable("F"))))
+    expr2.toCNF shouldEqual expr2
+  }
+
+  it should "convert correctly to CNF" in {
+    val A = Variable("A")
+    val B = Variable("B")
+    val C = Variable("C")
+
+    val expr = Not(Or(B, C))
+    val exprCNF = And(Not(B), Not(C))
+    expr.toCNF shouldEqual exprCNF
+
+    val expr2 = Or(And(A, B), C)
+    val exprCNF2 = And(Or(A,C), Or(B, C))
+    expr2.toCNF shouldEqual exprCNF2
+
+    val expr3 = Or(C, And(A, B))
+    val exprCNF3 = And(Or(C, A), Or(C, B))
+    expr3.toCNF shouldEqual exprCNF3
+
+    val notNotTrue = Not(Not(True))
+    notNotTrue.toCNF shouldEqual True
+
+    val notNotFalse = Not(Not(False))
+    notNotFalse.toCNF shouldEqual False
+  }
+
+  "toDNF" should "be invariant on DNF forms" in {
+    // See https://en.wikipedia.org/wiki/Disjunctive_normal_form#Definition
+    val A = Variable("A")
+    val B = Variable("B")
+    val C = Variable("C")
+    val D = Variable("D")
+    val E = Variable("E")
+    val F = Variable("F")
+
+    A.toDNF shouldEqual A
+
+    val AandB = And(A, Variable("B"))
+    AandB.toDNF shouldEqual AandB
+
+    val expr1 = Or(AandB, Variable("C"))
+    expr1.toDNF shouldEqual expr1
+
+    val expr2 = Or(And(A, And(Not(B), Not(C))), And(Not(D), And(E, F)))
+    expr2.toDNF shouldEqual expr2
+  }
+
+  it should "convert correctly to DNF" in {
+    val A = Variable("A")
+    val B = Variable("B")
+    val C = Variable("C")
+    val D = Variable("D")
+
+    val expr = Not(Or(A, B))
+    val exprDNF = And(Not(A), Not(B))
+    expr.toDNF shouldEqual exprDNF
+
+    val expr2 = Or(A, And(B, Or(C, D)))
+    val exprDNF2 = Or(A, Or(And(B, C), And(B, D)))
+    expr2.toDNF shouldEqual exprDNF2
+  }
 }
