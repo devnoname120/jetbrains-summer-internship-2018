@@ -147,18 +147,50 @@ class BooleanExpressionSpec extends FlatSpec with Matchers {
     val exprCNF2 = And(Or(A,C), Or(B, C))
     expr2.toCNF shouldEqual exprCNF2
 
-    val expr3 = Or(And(A, B), C)
-    val exprCNF3 = And(Or(A, C), Or(B, C))
+    val expr3 = Or(C, And(A, B))
+    val exprCNF3 = And(Or(C, A), Or(C, B))
     expr3.toCNF shouldEqual exprCNF3
-
-    val expr4 = Or(C, And(A, B))
-    val exprCNF4 = And(Or(C, A), Or(C, B))
-    expr4.toCNF shouldEqual exprCNF4
 
     val notNotTrue = Not(Not(True))
     notNotTrue.toCNF shouldEqual True
 
     val notNotFalse = Not(Not(False))
     notNotFalse.toCNF shouldEqual False
+  }
+
+  "toDNF" should "be invariant on DNF forms" in {
+    // See https://en.wikipedia.org/wiki/Disjunctive_normal_form#Definition
+    val A = Variable("A")
+    val B = Variable("B")
+    val C = Variable("C")
+    val D = Variable("D")
+    val E = Variable("E")
+    val F = Variable("F")
+
+    A.toDNF shouldEqual A
+
+    val AandB = And(A, Variable("B"))
+    AandB.toDNF shouldEqual AandB
+
+    val expr1 = Or(AandB, Variable("C"))
+    expr1.toDNF shouldEqual expr1
+
+    val expr2 = Or(And(A, And(Not(B), Not(C))), And(Not(D), And(E, F)))
+    expr2.toDNF shouldEqual expr2
+  }
+
+  it should "convert correctly to DNF" in {
+    val A = Variable("A")
+    val B = Variable("B")
+    val C = Variable("C")
+    val D = Variable("D")
+
+    val expr = Not(Or(A, B))
+    val exprDNF = And(Not(A), Not(B))
+    expr.toDNF shouldEqual exprDNF
+
+    val expr2 = Or(A, And(B, Or(C, D)))
+    val exprDNF2 = Or(A, Or(And(B, C), And(B, D)))
+    expr2.toDNF shouldEqual exprDNF2
   }
 }
