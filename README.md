@@ -18,4 +18,25 @@ def f(x: Int) : Int = {
 
 ## JSON serialization
 
-TODO
+### Functionality
+
+For this assignment, I've built code that has the following functionality:
+- Convert a `BooleanExpression` to JSON.
+- Convert a JSON to a `BooleanExpression`.
+- Display a `BooleanExpression` using math symbols.
+- Convert a `BooleanExpression` to CNF / DNF.
+
+Basic behavior can be observed by opening or running [Main.scala](https://github.com/devnoname120/jetbrains-summer-internship-2018/tree/master/src/main/scala/devnoname120/BooleanExpression/Main.scala).
+
+### Testing
+
+I've also made sure that the code was properly tested using ScalaTest. The tests are located in [BooleanExpressionSpec.scala](https://github.com/devnoname120/jetbrains-summer-internship-2018/tree/master/src/test/scala/devnoname120/BooleanExpression/BooleanExpressionSpec.scala).
+
+This repository also has continuous integration. I have chosen [Travis-CI](https://travis-ci.org/devnoname120/jetbrains-summer-internship-2018) for this.
+
+### Known limitations:
+
+- A `Variable` cannot have an empty symbol (design choice).
+- The `toMathString` method adds unnecessary parentheses, but the formula is still correct. This could be fixed by unrolling the nested `And`'s and `Or`'s.
+- `Json.fromJSON()` can throw Scala Play JSON exceptions if the JSON is invalid, if some fields are missing or if they are of the wrong type. See [BooleanExpressionSpec.scala](https://github.com/devnoname120/jetbrains-summer-internship-2018/tree/master/src/test/scala/devnoname120/BooleanExpression/BooleanExpressionSpec.scala) for examples of expected exceptions.
+- Parsing is made using (non-tail)recursive functions, if a JSON is very deep, it can cause stack overflow.
